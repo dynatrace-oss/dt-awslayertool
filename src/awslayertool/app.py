@@ -82,11 +82,11 @@ def add_download_args(parser: argparse.ArgumentParser):
 def make_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description="Download or clone a AWS Lambda layer.",
+        description="Download or clone an AWS Lambda layer.",
         epilog="""
 Example:
  Downloads the layer content to file my_layer-v1.zip.
-  %(prog)s--profile default pull arn:aws:lambda:us-east-1:1234861453:layer:my_layer:1
+  %(prog)s --profile default pull arn:aws:lambda:us-east-1:1234861453:layer:my_layer:1
 
  Clone layer to default account
   %(prog)s --profile default clone arn:aws:lambda:us-east-1:1234861453:layer:my_layer:1
@@ -151,7 +151,7 @@ def cmd_info(args):
 
 def error_exists(name):
     sys.exit(
-        "{} already exists. Remove and re-run or specify --overwrite option".format(
+        "{} already exists. Please, remove it and re-run or specify the --overwrite option".format(
             name,
         )
     )
@@ -264,7 +264,6 @@ def print_layerinfo(layerinfo):
 def main():
     parser = make_arg_parser()
     args = parser.parse_args()
-    print(args)
     globals()["cmd_" + args.command](args)
 
 
