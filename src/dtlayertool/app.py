@@ -1,7 +1,9 @@
 import argparse
+import hashlib
 import os
 import shutil
 import sys
+from base64 import b64encode
 from collections import namedtuple
 from collections.abc import Iterable
 from os import path
@@ -138,6 +140,19 @@ def extract_all_with_permission(zipfile: ZipFile, target_dir: str):
                 os.chmod(extracted_path, unix_attributes)
 
 
+def update_with_filecontents(
+    hasher: "hashlib._Hash", filename, bufsize: int = 8 * 1024 * 1024
+) -> "hashlib._Hash":
+    with open(filename, "rb") as infile:
+        buffer = memoryview(bytearray(bufsize))
+        while True:
+            nread = infile.readinto(buffer)
+            if nread <= 0:
+                break
+            hasher.update(buffer[:nread])
+    return hasher
+
+
 def eprint(*args, **kwargs):
     return print(*args, **kwargs, file=sys.stderr, flush=True)
 
@@ -190,12 +205,26 @@ def download_layer(client, layer_arn: str, overwrite: bool):
     )
     urlretrieve(layerinfo["Content"]["Location"], outfilename, reporthook=show_progress)
     eprint("Done.")  # Newline after progress report
+
+    # Verify file by checking size & SHA265
+
     filesize = path.getsize(outfilename)
     if filesize != codesize:
         sys.exit(
-            "Downloaded file corrupted -- expected {} bytes, but have {}", codesize
+            "Downloaded file corrupted -- expected {} bytes, but have {}".format(
+                codesize, filesize
+            )
         )
-
+    filehash = b64encode(  # AWS reports the hash as Base64 instead of the usual hex
+        update_with_filecontents(hashlib.sha256(), outfilename).digest()
+    ).decode("ascii")
+    expecthash = layerinfo["Content"]["CodeSha256"]
+    if filehash != expecthash:
+        sys.exit(
+            "Downloaded file corrupted -- expected SHA256 {}, but have {}".format(
+                expecthash, filehash
+            )
+        )
     eprint("downloaded layer content to", outfilename)
     return layerinfo, outfilename
 
