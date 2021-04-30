@@ -161,10 +161,10 @@ def show_progress(block_count, block_size, total_size):
     if block_count == 0:
         eprint("Connected...", end=" ")
     else:
-        blocks_per_mb = max(1, int(1024 * 1024 / block_size))
-        if block_count % blocks_per_mb == 0:
+        total_block_count = total_size / block_size
+        if block_count % (total_block_count // 10) == 0:
             ratio = block_count * block_size / total_size
-            eprint("{:%}".format(ratio), end=" ")
+            eprint("{:.0%}".format(ratio), end=" ")
 
 
 def download_layer(client, layer_arn: str, overwrite: bool):
