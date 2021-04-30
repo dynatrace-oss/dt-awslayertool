@@ -10,64 +10,9 @@ from zipfile import ZipFile
 
 import boto3
 
-# extract_all_with_permission from
-# https://stackoverflow.com/a/46837272/2128694
-# by de1 <https://stackoverflow.com/users/8676953/de1>
-
-ZIP_UNIX_SYSTEM = 3
-
-
-def extract_all_with_permission(zipfile: ZipFile, target_dir: str):
-    for info in zipfile.infolist():
-        extracted_path = zipfile.extract(info, target_dir)
-
-        if info.create_system == ZIP_UNIX_SYSTEM:
-            unix_attributes = info.external_attr >> 16
-            if unix_attributes:
-                os.chmod(extracted_path, unix_attributes)
-
-
-def eprint(*args, **kwargs):
-    return print(*args, **kwargs, file=sys.stderr, flush=True)
-
-
-class Arn(
-    namedtuple("Arn", "partition service region account_id resource_type resource_id")
-):
-    @classmethod
-    def parse(cls, raw: str) -> "Arn":
-        arn_prefix = "arn:"
-        if not raw.startswith(arn_prefix):
-            raise ValueError("Not an ARN (prefix missing): " + raw)
-        parts = raw[len(arn_prefix) :].split(":", 5)
-        if len(parts) == 5:
-            parts.insert(-2, None)  # resource-type is optional
-        if len(parts) != 6:
-            raise ValueError("ARN has too few parts: " + raw)
-        return cls._make(parts)
-
-    def __str__(self):
-        return "arn:" + ":".join(self)
-
-
-class LayerResourceName(namedtuple("LayerResourceName", "layer_name version")):
-    @classmethod
-    def parse(cls, raw: str) -> "LayerResourceName":
-        parts = raw.split(":", 2)
-        if len(parts) == 1:
-            return LayerResourceName(layer_name=parts[0], version=None)
-        if len(parts) > 2:
-            raise ValueError("Too many colons: " + raw)
-        return LayerResourceName._make(parts)
-
-    @classmethod
-    def from_arn(cls, arn: Arn) -> "LayerResourceName":
-        if arn.resource_type != "layer":
-            raise ValueError("Bad ARN type: " + arn.resource_type)
-        return cls.parse(arn.resource_id)
-
-    def __str__(self):
-        return ":".join(self)
+#
+# Commandline parsing #
+#
 
 
 def add_download_args(parser: argparse.ArgumentParser):
@@ -90,7 +35,7 @@ Example:
 
  Clone layer to default account
   %(prog)s --profile default clone arn:aws:lambda:us-east-1:1234861453:layer:my_layer:1
-  """,
+""",
     )
     parser.set_defaults(parser=parser)
     parser.add_argument(
@@ -132,6 +77,71 @@ Example:
     return parser
 
 
+#
+# Utility functions & types #
+#
+
+
+class Arn(
+    namedtuple("Arn", "partition service region account_id resource_type resource_id")
+):
+    @classmethod
+    def parse(cls, raw: str) -> "Arn":
+        arn_prefix = "arn:"
+        if not raw.startswith(arn_prefix):
+            raise ValueError("Not an ARN (prefix missing): " + raw)
+        parts = raw[len(arn_prefix) :].split(":", 5)
+        if len(parts) == 5:
+            parts.insert(-2, None)  # resource-type is optional
+        if len(parts) != 6:
+            raise ValueError("ARN has too few parts: " + raw)
+        return cls._make(parts)
+
+    def __str__(self):
+        return "arn:" + ":".join(self)
+
+
+class LayerResourceName(namedtuple("LayerResourceName", "layer_name version")):
+    @classmethod
+    def parse(cls, raw: str) -> "LayerResourceName":
+        parts = raw.split(":", 2)
+        if len(parts) == 1:
+            return LayerResourceName(layer_name=parts[0], version=None)
+        if len(parts) > 2:
+            raise ValueError("Too many colons: " + raw)
+        return LayerResourceName._make(parts)
+
+    @classmethod
+    def from_arn(cls, arn: Arn) -> "LayerResourceName":
+        if arn.resource_type != "layer":
+            raise ValueError("Bad ARN type: " + arn.resource_type)
+        return cls.parse(arn.resource_id)
+
+    def __str__(self):
+        return ":".join(self)
+
+
+# extract_all_with_permission from
+# https://stackoverflow.com/a/46837272/2128694
+# by de1 <https://stackoverflow.com/users/8676953/de1>
+
+ZIP_UNIX_SYSTEM = 3
+
+
+def extract_all_with_permission(zipfile: ZipFile, target_dir: str):
+    for info in zipfile.infolist():
+        extracted_path = zipfile.extract(info, target_dir)
+
+        if info.create_system == ZIP_UNIX_SYSTEM:
+            unix_attributes = info.external_attr >> 16
+            if unix_attributes:
+                os.chmod(extracted_path, unix_attributes)
+
+
+def eprint(*args, **kwargs):
+    return print(*args, **kwargs, file=sys.stderr, flush=True)
+
+
 def print_values(mapping, keys):
     for key in keys:
         value = mapping[key]
@@ -145,15 +155,10 @@ def query_layerinfo(client, layer_arn):
     return client.get_layer_version_by_arn(Arn=layer_arn)
 
 
-def cmd_info(args, session: boto3.Session):
-    print_layerinfo(
-        query_layerinfo(lambda_client_for(args.layer_arn, session), args.layer_arn)
-    )
-
-
 def error_exists(name):
     sys.exit(
-        "{} already exists. Please, remove it and re-run or specify the --overwrite option".format(
+        "{} already exists. "
+        "Please remove it and re-run or specify the --overwrite option".format(
             name,
         )
     )
@@ -164,7 +169,7 @@ def show_progress(block_count, block_size, total_size):
         eprint("Connected...", end=" ")
     else:
         total_block_count = total_size / block_size
-        if block_count % (total_block_count // 10) == 0:
+        if block_count % (total_block_count // 10) == 0:  # Print progress 10 times.
             ratio = block_count * block_size / total_size
             eprint("{:.0%}".format(ratio), end=" ")
 
@@ -184,18 +189,45 @@ def download_layer(client, layer_arn: str, overwrite: bool):
         )
     )
     urlretrieve(layerinfo["Content"]["Location"], outfilename, reporthook=show_progress)
-    eprint()  # Newline after progress report
+    eprint("Done.")  # Newline after progress report
     filesize = path.getsize(outfilename)
     if filesize != codesize:
         sys.exit(
             "Downloaded file corrupted -- expected {} bytes, but have {}", codesize
         )
+
     eprint("downloaded layer content to", outfilename)
     return layerinfo, outfilename
 
 
 def lambda_client_for(layer_arn: str, session: boto3.Session):
     return session.client("lambda", region_name=Arn.parse(layer_arn).region)
+
+
+def print_layerinfo(layerinfo):
+    content = layerinfo["Content"]
+    print_values(
+        layerinfo,
+        keys=(
+            "Description",
+            "LicenseInfo",
+            "CompatibleRuntimes",
+            "Version",
+            "CreatedDate",
+        ),
+    )
+    print_values(content, keys=("CodeSize", "CodeSha256", "Location"))
+
+
+#
+# Command entry point functions #
+#
+
+
+def cmd_info(args, session: boto3.Session):
+    print_layerinfo(
+        query_layerinfo(lambda_client_for(args.layer_arn, session), args.layer_arn)
+    )
 
 
 def cmd_pull(args, session: boto3.Session):
@@ -248,19 +280,9 @@ def cmd_clone(args, session: boto3.Session):
         )
 
 
-def print_layerinfo(layerinfo):
-    content = layerinfo["Content"]
-    print_values(
-        layerinfo,
-        keys=(
-            "Description",
-            "LicenseInfo",
-            "CompatibleRuntimes",
-            "Version",
-            "CreatedDate",
-        ),
-    )
-    print_values(content, keys=("CodeSize", "CodeSha256", "Location"))
+#
+# main #
+#
 
 
 def main():
