@@ -5,3 +5,4 @@
 venv*/
 build/
 *.egg-info
+/*.zip
