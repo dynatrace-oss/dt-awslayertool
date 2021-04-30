@@ -145,8 +145,10 @@ def query_layerinfo(client, layer_arn):
     return client.get_layer_version_by_arn(Arn=layer_arn)
 
 
-def cmd_info(args):
-    print_layerinfo(query_layerinfo(lambda_client_for(args.layer_arn), args.layer_arn))
+def cmd_info(args, session: boto3.Session):
+    print_layerinfo(
+        query_layerinfo(lambda_client_for(args.layer_arn, session), args.layer_arn)
+    )
 
 
 def error_exists(name):
@@ -192,11 +194,11 @@ def download_layer(client, layer_arn: str, overwrite: bool):
     return layerinfo, outfilename
 
 
-def lambda_client_for(layer_arn: str):
-    return boto3.client("lambda", region_name=Arn.parse(layer_arn).region)
+def lambda_client_for(layer_arn: str, session: boto3.Session):
+    return session.client("lambda", region_name=Arn.parse(layer_arn).region)
 
 
-def cmd_pull(args):
+def cmd_pull(args, session: boto3.Session):
     extractdir = args.extract  # type: str
     need_clean = False
     if extractdir:
@@ -206,7 +208,7 @@ def cmd_pull(args):
             else:
                 error_exists(extractdir)
     _layerinfo, outfilename = download_layer(
-        lambda_client_for(args.layer_arn), args.layer_arn, args.overwrite
+        lambda_client_for(args.layer_arn, session), args.layer_arn, args.overwrite
     )
     if extractdir:
         if need_clean:
@@ -216,14 +218,14 @@ def cmd_pull(args):
             extract_all_with_permission(zipfile, args.extract)
 
 
-def cmd_clone(args):
+def cmd_clone(args, session: boto3.Session):
     layerinfo, outfilename = download_layer(
-        lambda_client_for(args.layer_arn), args.layer_arn, args.overwrite
+        lambda_client_for(args.layer_arn, session), args.layer_arn, args.overwrite
     )
     arn = Arn.parse(args.layer_arn)
     target_region = args.target_region or arn.region
     eprint("cloning layer to", target_region)
-    client = boto3.client("lambda", region_name=target_region)
+    client = session.client("lambda", region_name=target_region)
 
     # We need to read the whole file into memory at once,
     # the API won't accept it any other way.
@@ -264,7 +266,12 @@ def print_layerinfo(layerinfo):
 def main():
     parser = make_arg_parser()
     args = parser.parse_args()
-    globals()["cmd_" + args.command](args)
+    session = (
+        boto3.Session()
+        if not args.profile
+        else boto3.Session(profile_name=args.profile)
+    )
+    globals()["cmd_" + args.command](args, session)
 
 
 if __name__ == "__main__":
