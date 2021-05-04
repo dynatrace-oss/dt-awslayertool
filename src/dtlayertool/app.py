@@ -17,13 +17,17 @@ import boto3
 #
 
 
-def add_download_args(parser: argparse.ArgumentParser):
+def add_download_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument(
         "-o",
         "--overwrite",
         action="store_true",
         help="overwrite existing layer contents or extracted folders",
     )
+
+
+def add_common_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("layer_arn", help="ARN of the layer to operate on")
 
 
 def make_arg_parser() -> argparse.ArgumentParser:
@@ -50,11 +54,21 @@ Example:
     subparsers = parser.add_subparsers(title="Commands", dest="command")
     subparsers.required = True
 
-    parser.add_argument("layer_arn", help="ARN of the layer to operate on")
+    def add_subparser(name, **kwargs) -> argparse.ArgumentParser:
+        # We use this awkward way to add the ARN argument to be more flexible
+        # with the argument order.
+        # Adding it to the root parser only kinda works. If you add it before
+        # calling add_subparsers, it is only recognized before the command.
+        # If you add it afterwards, it needs to be after all command options.
+        # With this, it needs to be after the command but command options may
+        # come before or after it (or mixed).
+        subparser = subparsers.add_parser(name, **kwargs)
+        add_common_args(subparser)
+        return subparser
 
-    subparsers.add_parser("info", help="print layer meta information")
+    add_subparser("info", help="print layer meta information")
 
-    pull_parser = subparsers.add_parser(
+    pull_parser = add_subparser(
         "pull", help="download given layer to <layer name>-<layer version>.zip file"
     )
     add_download_args(pull_parser)
@@ -65,14 +79,15 @@ Example:
         metavar="<folder>",
     )
 
-    clone_parser = subparsers.add_parser(
+    clone_parser = add_subparser(
         "clone", help="clone layer to AWS account defined by current profile"
     )
     add_download_args(clone_parser)
     clone_parser.add_argument(
         "-t",
         "--target-region",
-        help="clone the layer to the specified AWS region",
+        help="""clone the layer to the specified AWS region.
+            By default, the region of the source ARN is used""",
         metavar="<aws region>",
     )
 
@@ -307,6 +322,7 @@ def cmd_clone(args, session: boto3.Session):
             "something went terribly wrong -"
             " SHA256 fingerprint of source and cloned layer do not match."
         )
+    eprint("created", newlayerinfo["LayerVersionArn"])
 
 
 #

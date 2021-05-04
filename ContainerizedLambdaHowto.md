@@ -39,15 +39,16 @@ ENV DT_CONNECTION_AUTH_TOKEN=dt0a01...
 ## Add OneAgent extension to container image
 
 First, the contents of Dynatrace OneAgent extension must be downloaded.
-[`awslayertool`](./awslayertool.md) is a shell script to download given Lambda extension or
+`dtlayertool` is a Python 3.6+ application to download given Lambda extension or
 layers by their ARN. The ARN of Dynatrace OneAgent extension can be copied from the deployment screen.
 
 Example invocation:
 
 ```bash
-$ ./awslayertool --extract DynatraceOneAgentExtension pull arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs:1
+$ dtlayertool pull arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs:1 --extract DynatraceOneAgentExtension
 querying layer version meta information for arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs:1
 downloading arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs:1 content [1833343 bytes] to Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs-v1.zip ...
+Connected... 10% 20% 29% 39% 49% 59% 69% 79% 88% 98% Done.
 downloaded layer content to Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs-v1.zip
 extracting layer contents to "DynatraceOneAgentExtension"
 ```
