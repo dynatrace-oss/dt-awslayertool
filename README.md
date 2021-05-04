@@ -2,6 +2,14 @@
 
 `dtlayertool` is an utility to download or clone AWS Lambda Layers or extensions.
 
+## Installation
+
+> TODO: Upload to PyPI.
+
+Download or clone the repository. Then run `pip install ./<path to download>`.
+It is recommended that you install to a Python virtual environment (venv)
+and update the `pip`, `setuptools` and `wheel` packages before.
+
 ## Usage
 
     usage: dtlayertool [-h] [-p <aws profile>] {info,pull,clone} ...
