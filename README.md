@@ -6,9 +6,17 @@
 
 > TODO: Upload to PyPI.
 
-Download or clone the repository. Then run `pip install ./<path to download>`.
 It is recommended that you install to a Python virtual environment (venv)
-and update the `pip`, `setuptools` and `wheel` packages before.
+and update the `pip`, `setuptools` and `wheel` packages before installation.
+
+To install the latest development version, use
+
+```bash
+pip install 'git+https://github.com/dynatrace-oss/dtlayertool.git#egg=dtlayertool'
+```
+
+See the [`pip install` documentation](https://pip.pypa.io/en/stable/cli/pip_install/#git)
+for more information.
 
 ## Usage
 
