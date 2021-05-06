@@ -355,9 +355,9 @@ def cmd_clone(args, session: boto3.Session):
 #
 
 
-def main():
+def main(args: typing.Sequence[str] = None):
     parser = make_arg_parser()
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     if args.debug:
         if args.debug == 1:
             logging.basicConfig(level=logging.INFO)
