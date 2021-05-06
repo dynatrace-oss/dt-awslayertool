@@ -1,12 +1,15 @@
 import argparse
 import hashlib
+import json
+import logging
 import os
 import shutil
 import sys
+import typing
 from base64 import b64encode
-from collections import namedtuple
 from collections.abc import Iterable
 from os import path
+from typing import NamedTuple
 from urllib.request import urlretrieve
 from zipfile import ZipFile
 
@@ -15,6 +18,8 @@ import boto3
 #
 # Commandline parsing #
 #
+
+LOGGER = logging.getLogger(__name__)
 
 
 def add_download_args(parser: argparse.ArgumentParser) -> None:
@@ -50,6 +55,7 @@ Example:
         help="use the specified AWS profile (~/.aws/credentials)",
         metavar="<aws profile>",
     )
+    parser.add_argument("--debug", help="enable verbose debug logging", action="count")
 
     subparsers = parser.add_subparsers(title="Commands", dest="command")
     subparsers.required = True
@@ -99,9 +105,14 @@ Example:
 #
 
 
-class Arn(
-    namedtuple("Arn", "partition service region account_id resource_type resource_id")
-):
+class Arn(NamedTuple):
+    partition: str
+    service: str
+    region: str
+    account_id: str
+    resource_type: str
+    resource_id: str
+
     @classmethod
     def parse(cls, raw: str) -> "Arn":
         arn_prefix = "arn:"
@@ -118,7 +129,10 @@ class Arn(
         return "arn:" + ":".join(self)
 
 
-class LayerResourceName(namedtuple("LayerResourceName", "layer_name version")):
+class LayerResourceName(NamedTuple):
+    layer_name: str
+    version: str
+
     @classmethod
     def parse(cls, raw: str) -> "LayerResourceName":
         parts = raw.split(":", 2)
@@ -182,7 +196,9 @@ def print_values(mapping, keys):
 
 def query_layerinfo(client, layer_arn):
     eprint("querying layer version meta information for", layer_arn)
-    return client.get_layer_version_by_arn(Arn=layer_arn)
+    result = client.get_layer_version_by_arn(Arn=layer_arn)
+    loglayerinfo(result, "layer info for " + layer_arn)
+    return result
 
 
 def error_exists(name):
@@ -218,8 +234,11 @@ def download_layer(client, layer_arn: str, overwrite: bool):
             layer_arn, codesize, outfilename
         )
     )
-    urlretrieve(layerinfo["Content"]["Location"], outfilename, reporthook=show_progress)
+    httpresponse = urlretrieve(
+        layerinfo["Content"]["Location"], outfilename, reporthook=show_progress
+    )[1]
     eprint("Done.")  # Newline after progress report
+    LOGGER.debug("Retrieved layer with HTTP response metadata:\n%s", httpresponse)
 
     # Verify file by checking size & SHA265
 
@@ -261,6 +280,11 @@ def print_layerinfo(layerinfo):
         ),
     )
     print_values(content, keys=("CodeSize", "CodeSha256", "Location"))
+
+
+def loglayerinfo(layerinfo, description: str):
+    if LOGGER.isEnabledFor(logging.DEBUG):
+        LOGGER.debug("%s: %s", description, json.dumps(layerinfo, indent=2))
 
 
 #
@@ -315,6 +339,7 @@ def cmd_clone(args, session: boto3.Session):
         LicenseInfo=layerinfo["LicenseInfo"],
         Content=dict(ZipFile=layercontent),
     )
+    loglayerinfo(newlayerinfo, "new layer")
     newlayerhash = newlayerinfo["Content"]["CodeSha256"]
     layerhash = layerinfo["Content"]["CodeSha256"]
     if newlayerhash != layerhash:
@@ -333,6 +358,12 @@ def cmd_clone(args, session: boto3.Session):
 def main():
     parser = make_arg_parser()
     args = parser.parse_args()
+    if args.debug:
+        if args.debug == 1:
+            logging.basicConfig(level=logging.INFO)
+        else:
+            logging.basicConfig(level=logging.DEBUG)
+        LOGGER.setLevel(logging.DEBUG)
     session = (
         boto3.Session()
         if not args.profile
