@@ -54,10 +54,10 @@ def test_howto_clone():
         overwrite=False,
     )
 
+
 def test_clone_overwrite():
     args = parse_cmdline(
-        "clone --overwrite "
-        "arn:aws:lambda:us-east-1:123456789012:layer:foo:1"
+        "clone --overwrite arn:aws:lambda:us-east-1:123456789012:layer:foo:1"
     )
     assert vars(args) == dict(
         command="clone",
@@ -82,6 +82,7 @@ def test_howto_pull():
         overwrite=False,
         extract="DynatraceOneAgentExtension",
     )
+
 
 def test_pull_overwrite_noextract():
     args = parse_cmdline(
