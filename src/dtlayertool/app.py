@@ -215,7 +215,9 @@ def show_progress(block_count, block_size, total_size):
         eprint("Connected...", end=" ")
     else:
         total_block_count = total_size / block_size
-        if block_count % (total_block_count // 10) == 0:  # Print progress 10 times.
+        if (
+            block_count % max(1, total_block_count // 10) == 0
+        ):  # Print progress 10 times.
             ratio = block_count * block_size / total_size
             eprint("{:.0%}".format(ratio), end=" ")
 

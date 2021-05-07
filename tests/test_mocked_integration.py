@@ -61,9 +61,14 @@ def setup_urlretrieve(
         data: Optional[bytes] = None,
     ) -> Tuple[str, HTTPMessage]:
         assert url == MOCK_LOCATION
+        assert isinstance(data, bytes) or data is None
         filename = filename or "retrieved.dat"
+        reporthook(0, fsize // 2, fsize)
+        dstpath = (shutil.copyfile(srcpath, filename),)
+        reporthook(1, fsize // 2, fsize)
+        reporthook(2, fsize // 2, fsize)
         return (
-            shutil.copyfile(srcpath, filename),
+            dstpath,
             message_from_string(
                 f"""x-amz-id-2: o7+2hkEMcor15Ja=
 x-amz-request-id: 7YTCM76R6WJDQVP7
