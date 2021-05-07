@@ -24,23 +24,5 @@ The command cloned AWS Lambda layer
 `arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs:1` to the
 account defined by `default` AWS profile and AWS region `eu-central-1`.
 
-`dtlayertool` can be used to query the properties of the cloned or original layer in a readable format:
-
-```bash
-$ dtlayertool info arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs:1
-querying layer version meta information for arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs:1
-Description:         Dynatrace OneAgent 1.207.6.20201127-103507 for Node.js runtime.
-LicenseInfo:         Copyright (c) 2012-2020 Dynatrace LLC. All rights reserved.
-CompatibleRuntimes:  nodejs10.x nodejs12.x
-Version:             1
-CreatedDate:         2020-11-27T09:40:44.607+0000
-CodeSize:            1833343
-CodeSha256:          PHsE+LnCmzo9aP2+HC7BDNXKwNxKITtRU9+2TnxPmNQ=
-Location:            https://prod-04-2014-layers.s3.us-east-1.amazonaws.com/snapshots/725887861453/Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs-75cf9f3f-85f9-4134-a48c-d11acc158daf?versionId=...
-```
-
-Using the `aws` command line tool (`aws lambda get-layer-version-by-arn --arn arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs:1`)
-displays more complete information.
-
 Once the layer is cloned to the specific account or region, it can be attached to Lambda functions to enable
 monitoring.

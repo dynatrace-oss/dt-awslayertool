@@ -38,14 +38,14 @@ def add_common_args(parser: argparse.ArgumentParser) -> None:
 def make_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
-        description="Download or clone an AWS Lambda layer.",
+        description=__doc__,
         epilog="""
 Example:
  Downloads the layer content to file my_layer-v1.zip.
-  %(prog)s --profile default pull arn:aws:lambda:us-east-1:1234861453:layer:my_layer:1
+  %(prog)s pull arn:aws:lambda:us-east-1:1234861453:layer:my_layer:1
 
  Clone layer to default account
-  %(prog)s --profile default clone arn:aws:lambda:us-east-1:1234861453:layer:my_layer:1
+  %(prog)s clone arn:aws:lambda:us-east-1:1234861453:layer:my_layer:1
 """,
     )
     parser.set_defaults(parser=parser)
