@@ -57,8 +57,8 @@ def setup_urlretrieve(
     def mocked_urlretrieve(
         url: str,
         filename: Optional[Union[str, os.PathLike]] = None,
-        _reporthook: Optional[Callable[[int, int, int], None]] = None,
-        _data: Optional[bytes] = None,
+        reporthook: Optional[Callable[[int, int, int], None]] = None,
+        data: Optional[bytes] = None,
     ) -> Tuple[str, HTTPMessage]:
         assert url == MOCK_LOCATION
         filename = filename or "retrieved.dat"

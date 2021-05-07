@@ -1,3 +1,4 @@
+import argparse
 import shlex
 from argparse import ArgumentError, Namespace
 
@@ -8,6 +9,17 @@ from dtlayertool.app import make_arg_parser
 # Note that the tests here use vars(namespace) == dict(...) instead of the
 # shorter and in theory equivalent namespace == Namespace(...) because
 # the error output of pytest is better for dicts.
+
+
+def argdict(args, **kwargs):
+    assert isinstance(args.parser, argparse.ArgumentParser)
+    result = dict(
+        parser=args.parser,
+        profile=None,
+        debug=None,
+    )
+    result.update(kwargs)
+    return result
 
 
 def parse_cmdline(cmdline: str) -> Namespace:
@@ -45,12 +57,12 @@ def test_howto_clone():
     args2.parser = args.parser
     assert args == args2
 
-    assert vars(args) == dict(
+    assert vars(args) == argdict(
+        args,
         command="clone",
         profile="default",
         layer_arn="arn:aws:lambda:us-east-1:123456789012:layer:foo:1",
         target_region="eu-central-1",
-        parser=args.parser,
         overwrite=False,
     )
 
@@ -59,12 +71,11 @@ def test_clone_overwrite():
     args = parse_cmdline(
         "clone --overwrite arn:aws:lambda:us-east-1:123456789012:layer:foo:1"
     )
-    assert vars(args) == dict(
+    assert vars(args) == argdict(
+        args,
         command="clone",
-        profile=None,
         layer_arn="arn:aws:lambda:us-east-1:123456789012:layer:foo:1",
         target_region=None,
-        parser=args.parser,
         overwrite=True,
     )
 
@@ -74,12 +85,28 @@ def test_howto_pull():
         "pull arn:aws:lambda:us-east-1:123456789012:layer:foo:1 "
         "--extract DynatraceOneAgentExtension"
     )
-    assert vars(args) == dict(
+    assert vars(args) == argdict(
+        args,
         command="pull",
-        profile=None,
         layer_arn="arn:aws:lambda:us-east-1:123456789012:layer:foo:1",
-        parser=args.parser,
         overwrite=False,
+        extract="DynatraceOneAgentExtension",
+    )
+
+
+def test_pull_positional_in_middle():
+    args = parse_cmdline(
+        "--profile=x --debug --debug pull --overwrite "
+        "arn:aws:lambda:us-east-1:123456789012:layer:foo:1 "
+        "--extract DynatraceOneAgentExtension"
+    )
+    assert vars(args) == argdict(
+        args,
+        profile="x",
+        debug=2,
+        command="pull",
+        layer_arn="arn:aws:lambda:us-east-1:123456789012:layer:foo:1",
+        overwrite=True,
         extract="DynatraceOneAgentExtension",
     )
 
@@ -88,11 +115,10 @@ def test_pull_overwrite_noextract():
     args = parse_cmdline(
         "pull --overwrite arn:aws:lambda:us-east-1:123456789012:layer:foo:1"
     )
-    assert vars(args) == dict(
+    assert vars(args) == argdict(
+        args,
         command="pull",
-        profile=None,
         layer_arn="arn:aws:lambda:us-east-1:123456789012:layer:foo:1",
-        parser=args.parser,
         overwrite=True,
         extract=None,
     )
@@ -100,9 +126,8 @@ def test_pull_overwrite_noextract():
 
 def test_howto_info():
     args = parse_cmdline("info arn:aws:lambda:us-east-1:123456789012:layer:foo:1")
-    assert vars(args) == dict(
+    assert vars(args) == argdict(
+        args,
         command="info",
-        profile=None,
         layer_arn="arn:aws:lambda:us-east-1:123456789012:layer:foo:1",
-        parser=args.parser,
     )
