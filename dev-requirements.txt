@@ -1,0 +1,6 @@
+black==21.4b2
+flake8~=3.9
+isort~=5.8
+pylint~=2.8
+pytest~=6.2
+twine>=3.4
