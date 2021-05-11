@@ -8,10 +8,10 @@ apply that disallow the usage of such shared AWS Lambda layers.
 
 To mitigate those security concerns, Dynatrace OneAgent AWS Lambda extension can be cloned to an private AWS account.
 
-`dtlayertool` can be used to clone a layer.
+`dt-awslayertool` can be used to clone a layer.
 
 ```bash
-$ dtlayertool --profile default clone arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs:1 --target-region eu-central-1
+$ dt-awslayertool --profile default clone arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs:1 --target-region eu-central-1
 querying layer version meta information for arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs:1
 downloading arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs:1 content [1833343 bytes] to Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs-v1.zip ...
 Connected... 10% 20% 29% 39% 49% 59% 69% 79% 88% 98% Done.

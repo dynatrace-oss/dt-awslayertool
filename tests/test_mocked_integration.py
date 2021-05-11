@@ -31,7 +31,7 @@ import boto3
 import pytest
 from botocore.stub import Stubber
 
-from dtlayertool import app
+from dtawslayertool import app
 
 
 @pytest.fixture
