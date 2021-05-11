@@ -6,8 +6,6 @@ including extensions distributed as layers.
 
 ## Installation
 
-> TODO: Upload to PyPI.
-
 It is recommended that you install to a Python virtual environment (venv)
 and update the `pip`, `setuptools` and `wheel` packages before installation.
 
@@ -16,6 +14,12 @@ $ python3 -m venv .venv # On Windows use "py -3" instead of "python3"
 $ . .venv/bin/activate  # On Windows use .venv\Scripts\activate
 (.venv) $ python -m pip install -U pip
 (.venv) $ pip install -U setuptools wheel
+```
+
+To install the latest released version from PyPI, use
+
+```bash
+pip install -U dt-awslayertool
 ```
 
 To install the latest development version, use
