@@ -18,7 +18,7 @@ from argparse import ArgumentError, Namespace
 
 import pytest
 
-from dtlayertool.app import make_arg_parser
+from dtawslayertool.app import make_arg_parser
 
 # Note that the tests here use vars(namespace) == dict(...) instead of the
 # shorter and in theory equivalent namespace == Namespace(...) because

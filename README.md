@@ -1,6 +1,6 @@
-# dtlayertool
+# dt-awslayertool
 
-`dtlayertool` is an utility to download or clone
+`dt-awslayertool` is an utility to download or clone
 [AWS Lambda Layers](https://docs.aws.amazon.com/lambda/latest/dg/configuration-layers.html),
 including extensions distributed as layers.
 
@@ -21,7 +21,7 @@ $ . .venv/bin/activate  # On Windows use .venv\Scripts\activate
 To install the latest development version, use
 
 ```bash
-pip install 'git+https://github.com/dynatrace-oss/dtlayertool.git#egg=dtlayertool'
+pip install 'git+https://github.com/dynatrace-oss/dt-awslayertool.git#egg=dt-awslayertool'
 ```
 
 See the [`pip install` documentation](https://pip.pypa.io/en/stable/cli/pip_install/#git)
@@ -29,9 +29,9 @@ for more information, e.g. how to install a particular version.
 
 ## Usage
 
-This sections is extracted from `dtlayertool --help` output.
+This sections is extracted from `dt-awslayertool --help` output.
 
-    usage: dtlayertool [-h] [-p <aws profile>] {info,pull,clone} ...
+    usage: dt-awslayertool [-h] [-p <aws profile>] {info,pull,clone} ...
 
     Download or clone an AWS Lambda layer.
 
@@ -49,16 +49,16 @@ This sections is extracted from `dtlayertool --help` output.
 
     Example:
     Downloads the layer content to file my_layer-v1.zip.
-        dtlayertool --profile default pull arn:aws:lambda:us-east-1:1234861453:layer:my_layer:1
+        dt-awslayertool --profile default pull arn:aws:lambda:us-east-1:1234861453:layer:my_layer:1
 
     Clone layer to default account
-        dtlayertool --profile default clone arn:aws:lambda:us-east-1:1234861453:layer:my_layer:1
+        dt-awslayertool --profile default clone arn:aws:lambda:us-east-1:1234861453:layer:my_layer:1
 
 ### info
 
 Print layer meta information.
 
-    usage: dtlayertool info [-h] layer_arn
+    usage: dt-awslayertool info [-h] layer_arn
 
     positional arguments:
     layer_arn             ARN of the layer to operate on
@@ -66,7 +66,7 @@ Print layer meta information.
 Example output:
 
 ```bash
-$ dtlayertool info arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs:1
+$ dt-awslayertool info arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs:1
 querying layer version meta information for arn:aws:lambda:us-east-1:725887861453:layer:Dynatrace_OneAgent_1_207_6_20201127-103507_nodejs:1
 Description:         Dynatrace OneAgent 1.207.6.20201127-103507 for Node.js runtime.
 LicenseInfo:         Copyright (c) 2012-2020 Dynatrace LLC. All rights reserved.
@@ -86,7 +86,7 @@ displays more complete information.
 Download given layer to `<layer name>-<layer version>.zip` file.
 See also [Clone Dynatrace OneAgent AWS Lambda extension](docs/CloneExtensionHowto.md).
 
-    usage: dtlayertool pull [-h] [-o] [-x <folder>] layer_arn
+    usage: dt-awslayertool pull [-h] [-o] [-x <folder>] layer_arn
 
     positional arguments:
     layer_arn             ARN of the layer to operate on
@@ -101,7 +101,7 @@ See also [Clone Dynatrace OneAgent AWS Lambda extension](docs/CloneExtensionHowt
 Clone layer to AWS account defined by current profile.
 See also [Enable Dynatrace monitoring for containerized AWS Lambda functions](docs/ContainerizedLambdaHowto.md).
 
-    usage: dtlayertool clone [-h] [-o] [-t <aws region>] layer_arn
+    usage: dt-awslayertool clone [-h] [-o] [-t <aws region>] layer_arn
 
     positional arguments:
     layer_arn             ARN of the layer to operate on
