@@ -33,3 +33,8 @@ jobs:
     - name: Check
       run: |
         scripts/check.py --check
+    - name: Smoke
+      run: |
+        python -m pip uninstall -y dt-awslayertool
+        python -m pip install *.whl
+        dt-awslayertool --help
