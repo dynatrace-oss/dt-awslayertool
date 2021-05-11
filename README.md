@@ -35,37 +35,41 @@ for more information, e.g. how to install a particular version.
 
 This sections is extracted from `dt-awslayertool --help` output.
 
-    usage: dt-awslayertool [-h] [-p <aws profile>] {info,pull,clone} ...
+```txt
+usage: dt-awslayertool [-h] [-p <aws profile>] [--debug] {info,pull,clone} ...
 
-    Download or clone an AWS Lambda layer.
+Utility to download or clone an AWS Lambda layer.
 
-    optional arguments:
-    -h, --help            show this help message and exit
-    -p <aws profile>, --profile <aws profile>
-                          use the specified AWS profile (~/.aws/credentials)
+optional arguments:
+  -h, --help            show this help message and exit
+  -p <aws profile>, --profile <aws profile>
+                        use the specified AWS profile (~/.aws/credentials)
+  --debug               enable verbose debug logging
 
-    Commands:
-    {info,pull,clone}
-        info              print layer meta information
-        pull              download given layer to <layer name>-<layer
-                          version>.zip file
-        clone             clone layer to AWS account defined by current profile
+Commands:
+  {info,pull,clone}
+    info                print layer meta information
+    pull                download given layer to <layer name>-<layer version>.zip file
+    clone               clone layer to AWS account defined by current profile
 
-    Example:
-    Downloads the layer content to file my_layer-v1.zip.
-        dt-awslayertool --profile default pull arn:aws:lambda:us-east-1:1234861453:layer:my_layer:1
+Example:
+ Downloads the layer content to file my_layer-v1.zip.
+  dt-awslayertool pull arn:aws:lambda:us-east-1:1234861453:layer:my_layer:1
 
-    Clone layer to default account
-        dt-awslayertool --profile default clone arn:aws:lambda:us-east-1:1234861453:layer:my_layer:1
+ Clone layer to default account
+  dt-awslayertool clone arn:aws:lambda:us-east-1:1234861453:layer:my_layer:1
+```
 
 ### info
 
 Print layer meta information.
 
-    usage: dt-awslayertool info [-h] layer_arn
+```txt
+usage: dt-awslayertool info [-h] layer_arn
 
-    positional arguments:
-    layer_arn             ARN of the layer to operate on
+positional arguments:
+  layer_arn   ARN of the layer to operate on
+```
 
 Example output:
 
@@ -90,28 +94,31 @@ displays more complete information.
 Download given layer to `<layer name>-<layer version>.zip` file.
 See also [Clone Dynatrace OneAgent AWS Lambda extension](docs/CloneExtensionHowto.md).
 
-    usage: dt-awslayertool pull [-h] [-o] [-x <folder>] layer_arn
+```txt
+usage: dt-awslayertool pull [-h] [-o] [-x <folder>] layer_arn
 
-    positional arguments:
-    layer_arn             ARN of the layer to operate on
+positional arguments:
+  layer_arn             ARN of the layer to operate on
 
-    optional arguments:
-    -o, --overwrite       overwrite existing layer contents or extracted folders
-    -x <folder>, --extract <folder>
-                          extract the downloaded layer content to given folder
+optional arguments:
+  -o, --overwrite       overwrite existing layer contents or extracted folders
+  -x <folder>, --extract <folder>
+                        extract the downloaded layer content to given folder
+```
 
 ### clone
 
 Clone layer to AWS account defined by current profile.
 See also [Enable Dynatrace monitoring for containerized AWS Lambda functions](docs/ContainerizedLambdaHowto.md).
 
-    usage: dt-awslayertool clone [-h] [-o] [-t <aws region>] layer_arn
+```txt
+usage: dt-awslayertool clone [-h] [-o] [-t <aws region>] layer_arn
 
-    positional arguments:
-    layer_arn             ARN of the layer to operate on
+positional arguments:
+  layer_arn             ARN of the layer to operate on
 
-    optional arguments:
-    -o, --overwrite       overwrite existing layer contents or extracted folders
-    -t <aws region>, --target-region <aws region>
-                          clone the layer to the specified AWS region. By
-                          default, the region of the source ARN is used
+optional arguments:
+  -o, --overwrite       overwrite existing layer contents or extracted folders
+  -t <aws region>, --target-region <aws region>
+                        clone the layer to the specified AWS region. By default, the region of the source ARN is used
+```
