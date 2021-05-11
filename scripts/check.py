@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Copyright 2021 Dynatrace LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +18,7 @@ import shlex
 import shutil
 import subprocess
 import sys
+from argparse import ArgumentParser
 from pathlib import PurePath
 
 # join_args and runsubprocess are based on code
@@ -62,8 +65,12 @@ def runsubprocess(params, *args, **kwargs):
 
 
 def main():
-    runsubprocess(("black", "."))
-    runsubprocess(("isort", "."))
+    parser = ArgumentParser(description="Run build, etc.")
+    parser.add_argument("--check", action="store_true", help="Do not automatically fix")
+    args = parser.parse_args()
+
+    runsubprocess(("black", ".") + (("--check", "--diff") if args.check else ()))
+    runsubprocess(("isort", ".") + (("--check", "--diff") if args.check else ()))
     runsubprocess(("flake8", "."))
     runsubprocess(("pylint", "./tests", "./src", "./scripts"))
     runsubprocess(("pytest", "./tests"))
